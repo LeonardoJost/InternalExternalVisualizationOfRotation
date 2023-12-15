@@ -1,0 +1,1050 @@
+---
+API: 2.1
+OpenSesame: 3.3.10
+Platform: nt
+---
+set width 1920
+set uniform_coordinates yes
+set title "Mental Rotation with 3 figures"
+set subject_parity even
+set subject_nr 0
+set start experiment
+set sound_sample_size -16
+set sound_freq 48000
+set sound_channels 2
+set sound_buf_size 1024
+set sampler_backend legacy
+set round_decimals 2
+set mouse_backend legacy
+set keyboard_backend legacy
+set height 1080
+set fullscreen no
+set form_clicks no
+set foreground white
+set font_underline no
+set font_size 24
+set font_italic no
+set font_family sans
+set font_bold no
+set experiment_path "C:\\Users\\LocalAdmin\\Documents\\GitHub\\InternalExternalVisualization\\OpenSesame"
+set disable_garbage_collection yes
+set description "The main experiment item"
+set coordinates uniform
+set compensation 0
+set color_backend legacy
+set clock_backend legacy
+set canvas_backend legacy
+set background "#000000"
+
+define sequence BlockSequence
+	set flush_keyboard yes
+	set description "Führt mehrere Items nacheinander aus"
+	run ReadInstructions always
+	run mouseHide always
+	run ShowInstructionsFixedDuration always
+	run ShowInstructions always
+	run setTime always
+	run Start_forceplate always
+	run pygaze_start_recording always
+	run ShowStimuli always
+	run SetBreakEndTime always
+	run pygaze_stop_recording always
+	run Stop_forceplate always
+	run RPEQuestionnaire always
+	run Break always
+
+define loop BlocksMain
+	set source_file ""
+	set source table
+	set repeat 4
+	set order random
+	set description "Repeatedly runs another item"
+	set cycles 3
+	set continuous no
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 aaBlock mental
+	setcycle 0 instructions "InstructionsMental.txt"
+	setcycle 0 maxDurationSecs 70
+	setcycle 0 feedbackDuration 1000
+	setcycle 0 feedback 0
+	setcycle 0 visual 0
+	setcycle 0 stopTurningAt0 0
+	setcycle 0 breakTimeSecs 90
+	setcycle 1 aaBlock visual
+	setcycle 1 instructions "InstructionsVisual.txt"
+	setcycle 1 maxDurationSecs 70
+	setcycle 1 feedbackDuration 1000
+	setcycle 1 feedback 0
+	setcycle 1 visual 1
+	setcycle 1 stopTurningAt0 0
+	setcycle 1 breakTimeSecs 90
+	setcycle 2 aaBlock visualStop
+	setcycle 2 instructions "InstructionsVisualStop.txt"
+	setcycle 2 maxDurationSecs 70
+	setcycle 2 feedbackDuration 1000
+	setcycle 2 feedback 0
+	setcycle 2 visual 1
+	setcycle 2 stopTurningAt0 1
+	setcycle 2 breakTimeSecs 90
+	run BlockSequence
+
+define loop BlocksPractice
+	set source_file ""
+	set source table
+	set repeat 1
+	set order random
+	set description "Führt wiederholt ein anderes Item aus"
+	set cycles 3
+	set continuous no
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 aaBlock practiceMental
+	setcycle 0 instructions "InstructionsMentalPractice.txt"
+	setcycle 0 maxDurationSecs 30
+	setcycle 0 feedbackDuration 1000
+	setcycle 0 feedback 1
+	setcycle 0 visual 0
+	setcycle 0 stopTurningAt0 0
+	setcycle 0 breakTimeSecs 10
+	setcycle 1 aaBlock practiceVisual
+	setcycle 1 instructions "InstructionsVisualPractice.txt"
+	setcycle 1 maxDurationSecs 30
+	setcycle 1 feedbackDuration 1000
+	setcycle 1 feedback 1
+	setcycle 1 visual 1
+	setcycle 1 stopTurningAt0 0
+	setcycle 1 breakTimeSecs 10
+	setcycle 2 aaBlock practiceVisualStop
+	setcycle 2 instructions "InstructionsVisualStopPractice.txt"
+	setcycle 2 maxDurationSecs 30
+	setcycle 2 feedbackDuration 1000
+	setcycle 2 feedback 1
+	setcycle 2 visual 1
+	setcycle 2 stopTurningAt0 1
+	setcycle 2 breakTimeSecs 10
+	run BlockSequence
+
+define sequence Break
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run mouseHide always
+	run ShowCountdown always
+	run ShowCountdownSequence never
+
+define sketchpad BreakAfterPractice
+	set duration mouseclick
+	set description "Displays stimuli"
+	draw textline center=1 color=white font_bold=no font_family=sans font_italic=no font_size="[instructionFontSize]" html=yes show_if=always text="Ende der Übungseinheit" x=0 y=0 z_index=0
+
+define sequence Consent
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run ReadConsent always
+	run QuestionsLoop_1 always
+
+define inline_script CreateID
+	set description "Executes Python code"
+	___run__
+	if(var.customID==1):
+		#ask for ID
+		#Create a form
+		form = Form(
+			cols=[1], rows=[2,1],
+			margins=(50,50,50,50), spacing=25
+		)
+		#show form with question and text input
+		form.set_widget(Label(text=var.IDprompt, center=False), (0,0))
+		textInput=TextInput(return_accepts=True, stub=u'ID', var=u'aaID', frame=True)
+		form.set_widget(textInput, (0,1))
+		form._exec()
+		#print(var.aaID)
+	else:
+		import time
+		var.aaID=time.time()
+	__end__
+	set _prepare ""
+
+define sketchpad FeedbackCorrect
+	set duration 0
+	set description "Präsentiert Stimuli"
+	draw textline center=1 color=white font_bold=no font_family=sans font_italic=no font_size=40 html=yes show_if=always text="[feedbackCorrect]" x=0 y=0 z_index=0
+
+define sketchpad FeedbackWrong
+	set duration 0
+	set description "Präsentiert Stimuli"
+	draw textline center=1 color=white font_bold=no font_family=sans font_italic=no font_size=40 html=yes show_if=always text="[feedbackWrong]" x=0 y=0 z_index=0
+
+define sketchpad Fixation
+	set duration 0
+	set description "Präsentiert Stimuli"
+	draw textline center=1 color=white font_bold=no font_family=sans font_italic=no font_size=40 html=yes show_if=always text="[fixation]" x=0 y=0 z_index=0
+
+define inline_script GetTime
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	var.thisTime=self.time()
+	#var.thisTimeRound=round(var.thisTime/1000)
+	var.breakTextCountdown=var.breakText+u'\n'+str((var.targetTime-var.thisTime)//1000+1)
+	#print(u'countdown rest time:'+str(var.restTime))
+	__end__
+
+define notepad License
+	__note__
+	### Mental Rotation experiment with visual rotation
+	#     Copyright (C) 2022  Leonardo Jost
+	# 
+	# This program is free software: you can redistribute it and/or modify
+	# it under the terms of the GNU General Public License as published by
+	# the Free Software Foundation, either version 3 of the License, or
+	# (at your option) any later version.
+	# 
+	# This program is distributed in the hope that it will be useful,
+	# but WITHOUT ANY WARRANTY; without even the implied warranty of
+	# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	# GNU General Public License for more details.
+	# 
+	# You should have received a copy of the GNU General Public License
+	# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	__end__
+	set description "A simple notepad to document your experiment. This plug-in does nothing."
+
+define sequence QuestionSequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run prepareQuestion always
+	run ShowForm always
+	run mouseShow always
+	run questionnaireLogger always
+
+define sequence QuestionSequence_1
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run prepareQuestion always
+	run ShowForm always
+	run mouseShow always
+
+define sequence Questionnaire
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run ReadQuestions always
+	run QuestionsLoop always
+
+define loop QuestionsLoop
+	set source_file ""
+	set source table
+	set repeat "[numberOfQuestions]"
+	set order random
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set break_if_on_first no
+	set break_if never
+	setcycle 0 empty_column ""
+	run QuestionSequence
+
+define loop QuestionsLoop_1
+	set source_file ""
+	set source table
+	set repeat "[numberOfQuestions]"
+	set order random
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set break_if_on_first no
+	set break_if never
+	setcycle 0 empty_column ""
+	run QuestionSequence_1
+
+define sequence RPEQuestionnaire
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run ReadRPEQuestions always
+	run QuestionsLoop always
+
+define inline_script ReadConsent
+	set description "Executes Python code"
+	___run__
+	with open(pool[var.consentFile]) as file:
+		var.questionsText = file.readlines()
+	var.numberOfQuestions=len(var.questionsText)
+	var.questionNumber=0
+	var.aaBlock=u'consent'
+	var.answerList=list()
+	var.showQuestion=1  #true is converted to yes, use 0/1 instead
+	var.form_response=u''
+	__end__
+	set _prepare ""
+
+define inline_script ReadInstructions
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	with open(pool[var.instructions]) as file:
+		instructionsText = file.read()
+	var.instructionsText=instructionsText.decode(u'UTF-8-sig').replace(u'F1',var.feedbackCorrect).replace(u'F2',var.feedbackWrong).replace(u'FX',var.fixation)
+	var.instructionsText1=var.instructionsText.split(u'(Continue)')[0]
+	#replace part after (Continue) by empty lines to keep spacing/positioning
+	#empty lines are trimmed rigorously (even non-breaking spaces) so dots are displayed
+	#pixelwise positioning of text is another option but difficult as converting fontsize to px is not uniform
+	if len(var.instructionsText.split(u'(Continue)'))>1:
+		continueLines=var.instructionsText.split(u'(Continue)')[1].count(u'\n')+1
+		var.instructionsText1+=u'<span style="color:rgba(0,0,0,.01)">.</span>\n'*continueLines
+	#remove (Continue)
+	var.instructionsText=var.instructionsText.replace(u'(Continue)',u'')
+	__end__
+
+define inline_script ReadQuestions
+	set description "Executes Python code"
+	___run__
+	with open(pool[var.questionnaireFile]) as file:
+		var.questionsText = file.readlines()
+	var.numberOfQuestions=len(var.questionsText)
+	var.questionNumber=0
+	var.aaBlock=u'questionnaire'
+	var.answerList=list()
+	var.showQuestion=1  #true is converted to yes, use 0/1 instead
+	var.form_response=u''
+	__end__
+	set _prepare ""
+
+define inline_script ReadRPEQuestions
+	set description "Executes Python code"
+	___run__
+	with open(pool[var.rpeQuestionnaireFile]) as file:
+		var.questionsText = file.readlines()
+	var.numberOfQuestions=len(var.questionsText)
+	var.questionNumber=0
+	var.aaBlock=var.aaBlock+u'Questionnaire'
+	var.answerList=list()
+	var.showQuestion=1  #true is converted to yes, use 0/1 instead
+	var.form_response=u''
+	__end__
+	set _prepare ""
+
+define sequence Rotation
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run calculateNextAngle always
+	run StimulusRotated always
+	run stimulusLogger always
+
+define inline_script SetBreakEndTime
+	set description "Executes Python code"
+	___run__
+	#set endTime
+	var.targetTime=self.time()+var.breakTimeSecs*1000
+	__end__
+	set _prepare ""
+
+define inline_script SetLogfile
+	set description "Executes Python code"
+	___run__
+	log.close()
+	log.open(exp.experiment_path+u'/Logfiles/%s.csv' % var.aaID)
+	#delete old (empty) log file
+	import os
+	try:
+		os.remove(exp.experiment_path+u'/subject-0.csv')
+	except OSError as e:  ## if failed, report it back to the user ##
+		print ("Error: %s - %s." % (e.filename, e.strerror))
+	#set capturepath for forceplate to similar as logfile
+	var.capturePath=u'C:\\Users\\LocalAdmin\\Desktop\\MentalVisualRotation\\Experiment\\Logfiles\\VisualMentalRotation\\Probanden\\' + var.aaID
+	#print(var.capturePath)
+	__end__
+	set _prepare ""
+
+define inline_script SetNamesAndResponses
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	import random
+	#load next stimuli from stimulusList
+	var.model,var.angle,var.orientation,var.axis=var.stimulusList[var.stimulusNumber]
+	var.stimulusNumber=var.stimulusNumber+1
+	#randomize orientation of left and right base figure
+	abArray=var.orientations
+	random.shuffle(abArray)
+	#set filenames of stimuli
+	var.modelLeftFile=getStimulusname(var.model,0,abArray[0],var.axis)
+	var.modelRightFile=getStimulusname(var.model,0,abArray[1],var.axis)
+	var.stimulusFile=getStimulusname(var.model,var.angle,var.orientation,var.axis)
+	
+	var.orientationLeftBase=abArray[0]
+	#set correct responses
+	if var.orientationLeftBase==var.orientation:
+		var.correct_response=u'left'
+	else:
+		var.correct_response=u'right'
+	__end__
+
+define inline_script SetResponseTime
+	set description "Executes Python code"
+	set _run "var.response_time=self.time()-var.startTimeOfStimulus-var.startTimeOfBlock"
+	set _prepare ""
+
+define inline_script ShowCountdown
+	set description "Executes Python code"
+	___run__
+	#set endTime
+	if var.targetTime-self.time()<5000:
+		var.targetTime=self.time()+5000
+	#no countdown if this is the last block (add)
+	if var.count_ShowStimuli+1==3*items[u'BlocksPractice'].var.repeat+3*items[u'BlocksMain'].var.repeat*var.count_BlocksPractice:
+		var.targetTime=self.time()
+		
+	#show countdown until last second
+	while var.targetTime>self.time()+900:
+		items.execute(u'ShowCountdownSequence')
+	__end__
+	___prepare__
+	#unused initial value for prepare phase
+	var.targetTime=0
+	__end__
+
+define sequence ShowCountdownSequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run GetTime always
+	run ShowTime always
+
+define inline_script ShowForm
+	set description "Executes Python code"
+	___run__
+	if(var.showQuestion==1):
+		#parameters
+		var.responseModified=u''
+		var.questionAppend=var.noAnswerError
+		#show question until answer is given
+		while(var.responseModified==u''):
+			# Create a form
+			form = Form(
+				cols=[1]*var.ncols, rows=[3,1],
+				margins=(10,10,10,10), spacing=25
+			)
+			#set widgets: question
+			form.set_widget(Label(text=var.thisQuestion, center=False), (0,0), colspan=var.ncols)
+			#add RPEscale for RPE questions
+			if u'RPE' in var.thisQuestionID:
+				image = ImageWidget(path=pool[u'ASS.png'], adjust=False, frame=False)
+				form.set_widget(image, (0, 0), colspan=var.ncols)
+			#set widgets depending on type and show form
+			#show form and get an answer
+			if var.questionType==u'TextInput':
+				textInput=TextInput(return_accepts=True, stub=u'Antwort', var=u'qAnswer')
+				form.set_widget(textInput, (0,1), colspan=3)
+				#add button to avoid answering
+				form.set_widget(Button(text=u'Ok', var=u'ok'), (3,1))
+				if var.avoidQuestionsPossible==1:
+					form.set_widget(Button(text=var.avoidQuestion), (4,1))		
+				form_response=form._exec()
+			elif var.questionType==u'Multiple':
+				for col in range(var.ncols):
+					form.set_widget(Button(text=var.thisQuestionOptions[col]), (col,1))		
+				form_response=form._exec()
+			elif var.questionType==u'ManualCode':
+				textInput=TextInput(return_accepts=True, stub=u'', var=u'qAnswer')
+				form.set_widget(textInput, (0,1))	
+				form_response=form._exec()
+			elif var.questionType==u'NecessaryCheckbox':
+				form.set_widget(Checkbox(text=var.thisQuestionID, var=u'qAnswer'),(0,1),colspan=3)
+				form.set_widget(Button(text=u'Ok'), (3,1))
+				form_response=form._exec()
+			else: #default is ShowText to avoid problems with first index
+				form.set_widget(Button(text=u'Ok'), (0,1))
+				form_response=form._exec()
+			#read answer
+			#get text answer from textinput if text is approved by button
+			if var.questionType==u'TextInput' and not form_response==var.avoidQuestion:
+				var.responseModified=var.qAnswer
+			#get if required manual code was entered
+			elif var.questionType==u'ManualCode' and not var.qAnswer==var.thisQuestionID:
+				var.responseModified=u''
+				var.questionAppend=u''
+			#get if checkbox was checked
+			elif var.questionType==u'NecessaryCheckbox' and var.qAnswer==u'no':
+				var.responseModified=u''
+				var.questionAppend=u''
+			else: 
+				var.responseModified=form_response
+			#modify question for repeat	
+			var.thisQuestion=var.thisQuestion+var.questionAppend
+			#do not append more if question is again not answered
+			var.questionAppend=u''
+	#save answer in list (for comparison with conditions)	
+	var.answerList.append((var.thisQuestionID,var.responseModified))
+	__end__
+	set _prepare ""
+
+define sketchpad ShowInstructions
+	set duration mouseclick
+	set description "Präsentiert Stimuli"
+	draw textline center=1 color=white font_bold=no font_family=sans font_italic=no font_size="[instructionFontSize]" html=yes show_if=always text="[instructionsText]" x=0 y=0 z_index=0
+
+define sketchpad ShowInstructionsFixedDuration
+	set duration "[instructionDuration]"
+	set description "Präsentiert Stimuli"
+	draw textline center=1 color=white font_bold=no font_family=sans font_italic=no font_size="[instructionFontSize]" html=yes show_if=always text="[instructionsText1]" x=0 y=0 z_index=0
+
+define loop ShowStimuli
+	set source_file ""
+	set source table
+	set repeat "[loopRuns]"
+	set order sequential
+	set description "Führt wiederholt ein anderes Item aus"
+	set cycles 1
+	set continuous no
+	set break_if_on_first yes
+	set break_if "[endTime]>[maxDuration]"
+	setcycle 0 empty_column ""
+	run ShowStimuliSequence
+
+define sequence ShowStimuliRotated
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run tempParameters always
+	run eyeTrackingParameters always
+	run VisualOrMentalRotation always
+	run Rotation never
+	run resetTempParameters always
+
+define sequence ShowStimuliSequence
+	set flush_keyboard yes
+	set description "Führt mehrere Items nacheinander aus"
+	run setStartTime always
+	run SetNamesAndResponses always
+	run ShowStimuliRotated always
+	run SetResponseTime always
+	run FeedbackCorrect "[feedback]=1 and [correct]=1"
+	run FeedbackWrong "[feedback]=1 and [correct]=0"
+	run Fixation "[feedback]=0"
+	run stimulusLogger always
+	run calculateDuration always
+
+define sketchpad ShowTime
+	set duration 0
+	set description "Displays stimuli"
+	draw textline center=1 color=white font_bold=no font_family=sans font_italic=no font_size=40 html=yes show_if=always text="[breakTextCountdown]" x=0 y=0 z_index=0
+
+define inline_script Start_forceplate
+	set description "Executes Python code"
+	___run__
+	var.a = UDPBroadcast()
+	#var.a.PacketID = var.zaehler_packetID # weist glaube ich gerade jedem Durchgang eine spezifische Zahl zu
+	var.a.BroadcastStart()
+	#print(var.a.PacketID)
+	var.forceplate_startzeit = self.time()
+	#increase zaehler_packetID
+	var.zaehler_packetID=var.zaehler_packetID+2
+	__end__
+	___prepare__
+	from socket import *
+	import time
+	
+	class UDPBroadcast( object ):
+	  PacketID = var.zaehler_packetID
+	  IpAddress = '255.255.255.255'
+	  Port = 30
+	  CapturePath = var.capturePath
+	  CaptureTime = 2.0
+	
+	  def BroadcastStart( object ):
+	    cs = socket(AF_INET, SOCK_DGRAM)
+	    cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+	    cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+	
+	    data = r'<?xml version="1.0" encoding="utf-8" standalone="no"?>'
+	    data += r'<CaptureStart>'
+	    data += ( r'<PacketID VALUE="{}"/>' ).format( int(UDPBroadcast.PacketID) )
+	    data += ( r'<Name VALUE="TestCapture{}"/>' ).format( int( UDPBroadcast.PacketID) )
+	    data += r'<Notes VALUE=""/>'
+	    data += r'<Description VALUE=""/>'
+	    data += ( r'<DatabasePath VALUE="{}"/>' ).format( UDPBroadcast.CapturePath )
+	    data += r'</CaptureStart>'
+	    cs.sendto(data.encode(), (UDPBroadcast.IpAddress, int(UDPBroadcast.Port)))
+	    print ("Broadcast Start")
+	
+	  def BroadcastStop( object ):
+	    cs = socket(AF_INET, SOCK_DGRAM)
+	    cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+	    cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+	
+	    data = r'<?xml version="1.0" encoding="utf-8" standalone="no"?>'
+	    data += r'<CaptureStop>'
+	    data += ( r'<PacketID VALUE="{}"/>' ).format( int(UDPBroadcast.PacketID)+1 )
+	    data += ( r'<Name VALUE="TestCapture{}"/>' ).format( int(UDPBroadcast.PacketID) )
+	    data += ( r'<DatabasePath VALUE="{}"/>' ).format( UDPBroadcast.CapturePath )
+	    data += r'<TimeCode VALUE="10 25 26 5 0 0 0 2"/>'
+	    data += r'</CaptureStop>'
+	    cs.sendto(data.encode(), (UDPBroadcast.IpAddress , int( UDPBroadcast.Port )))
+	
+	    print ("Broadcast Stop")
+	__end__
+
+define inline_script StimulusRandomization
+	set description "Executes Python code"
+	___run__
+	import random
+	#initialize lists
+	stimulusList=list()
+	stimulusList1=list()
+	#add all stimuli once to stimulusList1
+	for model in var.models:
+		for angle in var.angles:
+			#add angle in random direction
+			random.shuffle(var.directions)
+			angle=angle*var.directions[0]
+			if angle<0:
+				angle=360+angle
+			for orientation in var.orientations:
+				if angle==0:
+					stimulusList1.append((model,angle,orientation,u'0'))
+				else:	
+					for axis in var.axes:
+						stimulusList1.append((model,angle,orientation,axis))
+						
+	for i in range(var.numberOfTrials):
+		#randomize order in stimulusList1 until overlap condition is met	
+		overlap=1
+		while overlap>0:
+			random.shuffle(stimulusList1)
+			overlap=len(set(stimulusList1[:var.minOverlap]).intersection(stimulusList[len(stimulusList)-var.minOverlap:]))
+		#add all stimuli to stimulusList	
+		for stimulusPair in stimulusList1:
+			stimulusList.append(stimulusPair)
+	var.stimulusList=stimulusList
+	#set starting index (continued list through all blocks)
+	var.stimulusNumber=0
+	__end__
+	set _prepare ""
+
+define sketchpad StimulusRotated
+	# draw textline center=1 color=white font_bold=no font_family=sans font_italic=no font_size=40 html=yes show_if=always text="[endTime]" x=0 y=0 z_index=0
+	set duration 1
+	set description "Präsentiert Stimuli"
+	draw image center=1 file="[modelLeftFile]" scale=1 show_if=always x=-500 y=-200 z_index=0
+	draw image center=1 file="[modelRightFile]" scale=1 show_if=always x=500 y=-200 z_index=0
+	draw image center=1 file="[stimulusFile]" scale=1 show_if=always x=0 y=200 z_index=0
+
+define inline_script Stop_forceplate
+	set description "Executes Python code"
+	set _run "var.a.BroadcastStop()"
+	set _prepare ""
+
+define inline_script VisualOrMentalRotation
+	set description "Executes Python code"
+	___run__
+	#before rotation: set rotation direction
+	import random
+	directionArray=[-1,1]
+	#random direction
+	#random.shuffle(directionArray)
+	#rotate in direction of short side
+	if var.angle>180:
+		directionArray[0]=1
+	elif var.angle==180:
+		random.shuffle(directionArray)
+	var.rotationDirection=0
+	startTurning=0
+	#show stimulus until answer is given
+	var.response=0
+	import pygame
+	import math
+	#execute rotation until answer is given
+	while var.response==0:
+		#use rotation direction for visual rotation after 500ms, otherwise 0
+		var.response_time=self.time()-var.startTimeOfStimulus-var.startTimeOfBlock
+		if startTurning==0 and var.visual==1 and var.response_time>500:
+			var.rotationDirection=directionArray[0]
+			startTurning=1
+		#get gaze position from pygaze
+		eyeX, eyeY = eyetracker.sample()
+	    #update to screen position (for 1920x1080)
+		eyeX=eyeX-960
+		eyeY=eyeY-540
+		#get pupil size
+		var.pupilSize = eyetracker.pupil_size()
+		#print(eyeX,eyeY,var.pupilSize)
+		if var.pupilSize<1:
+			var.blinkFrames=var.blinkFrames+1
+		else:
+			#get position of gaze position on stimuli
+			#left stimulus
+			if math.sqrt((eyeX+500)**2+(eyeY+200)**2)<320:
+				var.stimulusLeftSum=var.stimulusLeftSum+1
+				var.stimulusLeft=1
+				var.stimulusRight=0
+				var.stimulusBottom=0
+				#print(u'left')
+			#right stimulus
+			elif math.sqrt((eyeX-500)**2+(eyeY+200)**2)<320:
+				var.stimulusRightSum=var.stimulusRightSum+1
+				var.stimulusRight=1
+				var.stimulusLeft=0
+				var.stimulusBottom=0
+				#print(u'right')
+			elif math.sqrt((eyeX)**2+(eyeY-200)**2)<320:
+				var.stimulusBottomSum=var.stimulusBottomSum+1
+				var.stimulusBottom=1
+				var.stimulusLeft=0
+				var.stimulusRight=0
+				#print(u'bottom')
+			var.pupilSizeSum=var.pupilSizeSum+var.pupilSize
+			#count frames
+			var.frames=var.frames+1
+		#get mouse clicks (answers)
+		pressed1, pressed2, pressed3 = pygame.mouse.get_pressed()
+		#reverse due to index finger clicking
+		if pressed3==1:
+			var.response=u'left'
+		elif pressed1==1:
+			var.response=u'right'
+		else:
+			items.execute(u'Rotation')
+	#check if answer is correct
+	var.correct=int(var.response==var.correct_response)
+	__end__
+	set _prepare ""
+
+define sketchpad blankscreen
+	set duration 0
+	set description "Präsentiert Stimuli"
+
+define inline_script calculateDuration
+	set description "Executes Python code"
+	___run__
+	#calculate end time of feedback from start of stimulus and response time
+	var.endTime=var.startTimeOfStimulus+var.response_time+var.feedbackDuration
+	#check if time is out
+	if var.endTime>var.maxDuration and var.feedback:
+		#show feedback
+		clock.sleep(var.endTime-self.time()+var.startTimeOfBlock)
+	#note that feedback for other trials is shown in prepare phase of this script
+	__end__
+	___prepare__
+	#and show feedback/fixation of previous trial for approximately the correct time
+	#print(var.endTime-self.time()+var.startTimeOfBlock)
+	clock.sleep(var.endTime-self.time()+var.startTimeOfBlock)
+	#note that exit condition is checked in run phase of this script
+	__end__
+
+define inline_script calculateNextAngle
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	#calculate new angle
+	var.angle=var.angle+var.rotationDirection*var.angleStep
+	#check for value range
+	while var.angle<0:
+		var.angle=var.angle+360
+	while var.angle>=360:
+		var.angle=var.angle-360
+	if var.stopTurningAt0==1 and var.angle==0:
+		var.rotationDirection=0
+	#set stimulus filename
+	var.stimulusFile=getStimulusname(var.model,var.angle,var.orientation,var.axis)
+	__end__
+
+define sequence experiment
+	set flush_keyboard yes
+	set description "Führt mehrere Items nacheinander aus"
+	run License always
+	run parameters always
+	run CreateID always
+	run StimulusRandomization always
+	run SetLogfile always
+	run functions always
+	run Consent always
+	run mouseHide always
+	run blankscreen always
+	run pygaze_init always
+	run BlocksPractice always
+	run BreakAfterPractice always
+	run BlocksMain always
+	run Questionnaire always
+
+define inline_script eyeTrackingParameters
+	set description "Führt Python Code aus"
+	set _run ""
+	___prepare__
+	#start counting frames for saving eye data
+	var.frames=0
+	var.stimulusLeftSum=0
+	var.stimulusRightSum=0
+	var.stimulusBottomSum=0
+	var.pupilSizeSum=0
+	var.blinkFrames=0
+	__end__
+
+define inline_script functions
+	set description "Executes Python code"
+	___run__
+	global getStimulusname
+	def getStimulusname(model, angle, orientation, axis):
+	    if angle==0:
+		    return(str(model)+u'_'+orientation+u'.png')
+	    else:
+		    return(str(model)+u'_'+orientation+u'_'+axis+u'_'+str(angle)+u'.png')
+	__end__
+	set _prepare ""
+
+define inline_script mouseHide
+	set description "Führt Python Code aus"
+	___run__
+	#hide mouse
+	my_mouse = Mouse()
+	my_mouse.show_cursor(show=False)
+	__end__
+	set _prepare ""
+
+define inline_script mouseShow
+	set description "Führt Python Code aus"
+	___run__
+	#show mouse and prevent returning to center
+	my_mouse = Mouse()
+	my_mouse.show_cursor(show=True)
+	__end__
+	set _prepare ""
+
+define inline_script parameters
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	### parameters
+	#should a custom ID be used? Otherwise date and time will be ID
+	#1 for true, 0 (or other) for false) #true is converted to yes, use 0/1 instead
+	var.customID=1
+	#ID prompt (only necessary if customID is used)
+	var.IDprompt=u'Bitte ID eingeben und mit Enter bestätigen.'
+	##feedback/fixation (fixation is automatically chosen if no feedback is given)
+	#also used to replace placeholders in instructions
+	var.feedbackCorrect=u'✓'
+	var.feedbackWrong=u'✗'
+	var.fixation=u'+'
+	##instructions
+	#minimum duration of instructions in ms
+	var.instructionDuration=1000
+	var.instructionFontSize=24
+	#break text
+	var.breakText=u'<b>Pause</b>\n\nKurze Pause.\nDer nächste Teil beginnt gleich.\n'
+	##questionnaire: 
+	#option to avoid question
+	var.avoidQuestionsPossible=0
+	var.avoidQuestion=u'keine Angabe'
+	#file containing consent
+	var.consentFile=u'Consent.txt'
+	#file containing questions
+	var.questionnaireFile=u'Fragebogen.txt'
+	#file containing RPE questions
+	var.rpeQuestionnaireFile=u'FragebogenRPE.txt'
+	#added message if no answer is given
+	var.noAnswerError=u'\n\nBitte geben Sie eine Antwort ein'
+	#stimulus generation
+	#number of occurences of each stimulus in the generated random list
+	var.numberOfTrials=40
+	#stimulus parameters
+	var.minOverlap=10 #minimal number of stimuli at start and end of random lists, that are not the same (should be at least 0 and well below total number of stimuli divided by 2 otherwise endless looping)
+	#array of model numbers
+	var.models=list(range(2,9))+list(range(12,17))
+	#angles of rotation
+	angleDiff=45
+	minAngle=45
+	maxAngle=180
+	var.angles=list(range(minAngle,maxAngle+angleDiff,angleDiff))
+	#directions of rotation
+	var.directions=[-1,1]
+	#steps for visual rotation
+	var.angleStep=3
+	#orientations
+	var.orientations=[u'a',u'b']
+	#axes
+	var.axes=[u'y']
+	#starting variable for force plate
+	var.zaehler_packetID=1
+	__end__
+
+define inline_script prepareQuestion
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	#get this question
+	thisQuestionFull=var.questionsText[var.questionNumber].decode(u'UTF-8-sig')
+	var.questionNumber=var.questionNumber+1
+	#prepare
+	var.showQuestion=1
+	#get question type
+	#if question starts with ( -> type
+	if thisQuestionFull[0]==u'(':
+		thisQuestionSplit=thisQuestionFull.split(u')')
+		thisQuestionType=thisQuestionSplit[0].replace(u'(','',1)
+		#rest of question (+2 for brackets)
+		thisQuestionRest=thisQuestionFull[len(thisQuestionType)+2:]
+	else:
+		thisQuestionType=u''
+		thisQuestionRest=thisQuestionFull
+		print(thisQuestionFull[:3])
+	var.questionType=thisQuestionType
+	#if questiontype is multiple -> get Options
+	if thisQuestionType=='Multiple':
+		#get options in parenthenses
+		var.thisQuestionOptions=thisQuestionRest.split(u')')[0].split(u',')
+		#remove leading (
+		var.thisQuestionOptions[0]=var.thisQuestionOptions[0][1:]
+		#add additional option
+		if var.avoidQuestionsPossible==1:
+			var.thisQuestionOptions.append(var.avoidQuestion)
+		var.ncols=len(var.thisQuestionOptions)
+		thisQuestionRest=thisQuestionRest[len(thisQuestionRest.split(u')')[0])+1:]
+	elif thisQuestionType=='TextInput':
+		var.ncols=4+var.avoidQuestionsPossible
+	elif thisQuestionType=='NecessaryCheckbox':
+		var.ncols=4
+	else:	
+		var.ncols=1
+	#if question starts with ( -> ID
+	if thisQuestionRest[0]==u'(':
+		thisQuestionNext=thisQuestionRest.split(u')')[0].replace(u'(','',1)
+		thisQuestionRest=thisQuestionRest[len(thisQuestionNext)+2:]
+		var.thisQuestionID=thisQuestionNext
+	else:
+		var.thisQuestionID=var.questionNumber #added 1 is included here
+	#if question starts with ( -> check
+	if thisQuestionRest[0]==u'(':
+		thisQuestionNext=thisQuestionRest.split(u')')[0].replace(u'(','',1)
+		thisQuestionRest=thisQuestionRest[len(thisQuestionNext)+2:]
+		if "==" in thisQuestionNext:
+			#comparison condition with ID
+			checkID=thisQuestionNext.split(u'==')[0]
+			checkAnswer=thisQuestionNext.split(u'==')[1]
+			#print(checkID+u' '+checkAnswer)
+			if (checkID,checkAnswer) in var.answerList:
+				#condition fulfilled
+				#showing question
+				#if question starts with ( -> ?
+				if thisQuestionRest[0]==u'(':
+					#other operation? add later
+					print(u'no processing being added yet for ' + thisQuestionNext)
+			else:
+				#condition not fulfilled
+				#do not show question (but do log)
+				var.responseModified=checkID+u'!='+checkAnswer
+				var.showQuestion=0
+		else:
+			#other operation? add later
+			print(u'no processing being added yet for ' + thisQuestionNext)
+	
+	var.thisQuestion=thisQuestionRest.replace(u'--',u'\n')
+	__end__
+
+define pygaze_init pygaze_init
+	set tracker_type SMI
+	set tobiiglasses_udpport 49152
+	set tobiiglasses_address "192.168.71.50"
+	set smi_send_port 4444
+	set smi_recv_port 5555
+	set smi_ip "127.0.0.1"
+	set sacc_vel_thr 35
+	set sacc_acc_thr 9500
+	set eyelink_pupil_size_mode area
+	set eyelink_force_drift_correct yes
+	set description "Initialize and calibrate eye tracker"
+	set calibrate yes
+	set calbeep yes
+	set alea_api_key "Contact Alea for an API key"
+	set alea_animated_calibration no
+	set _logfile automatic
+
+define pygaze_start_recording pygaze_start_recording
+	set status_msg start_trial
+	set description "Puts the eye tracker into recording mode"
+
+define pygaze_stop_recording pygaze_stop_recording
+	set status_msg stop_trial
+	set description "Stops recording of eye tracking data"
+
+define logger questionnaireLogger
+	set description "Logs experimental data"
+	set auto_log no
+	log aaBlock
+	log thisQuestionID
+	log responseModified
+	log aaID
+
+define inline_script resetTempParameters
+	set description "Executes Python code"
+	___run__
+	var.angle=var.angleOrig
+	var.aaBlock=var.aaBlockOrig
+	__end__
+	set _prepare ""
+
+define inline_script setStartTime
+	set description "Executes Python code"
+	___run__
+	#start time of run phase (after preparation)
+	var.startTimeOfStimulus=self.time()-var.startTimeOfBlock
+	__end__
+	___prepare__
+	#set startTime after all initialization of loop
+	if var.stimulusNumber==var.firstIndexOfBlock:
+		var.startTimeOfBlock=self.time()
+		var.endTime=0
+		var.startTimeOfStimulus=0
+	#note that start time of run phase is set in run part of this script
+	__end__
+
+define inline_script setTime
+	set description "Executes Python code"
+	___run__
+	#set timing options
+	var.endTime=0
+	var.maxDuration=var.maxDurationSecs*1000
+	#set maximal number of loop items
+	var.loopRuns=len(var.stimulusList)-var.stimulusNumber
+	var.firstIndexOfBlock=var.stimulusNumber
+	__end__
+	set _prepare ""
+
+define logger stimulusLogger
+	set description "Registriert experimentelle Daten"
+	set auto_log no
+	log model
+	log angle
+	log orientation
+	log orientationLeftBase
+	log axis
+	log response_time
+	log correct
+	log aaBlock
+	log correct_response
+	log aaID
+	log startTimeOfStimulus
+	log startTimeOfBlock
+	log zaehler_packetID
+	log frames
+	log stimulusLeft
+	log stimulusRight
+	log stimulusBottom
+	log pupilSizeSum
+	log blinkFrames
+	log forceplate_startzeit
+	log pupilSize
+	log stimulusLeftSum
+	log stimulusRightSum
+	log stimulusBottomSum
+
+define inline_script tempParameters
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	#save original angle
+	var.angleOrig=var.angle
+	var.aaBlockOrig=var.aaBlock
+	#needed for prepare phase of Rotation, never used
+	var.rotationDirection=0
+	#log parameters for symmetry within loggers
+	var.aaBlock=var.aaBlock+u'ShowStimulus'
+	var.correct=-1
+	__end__
+
